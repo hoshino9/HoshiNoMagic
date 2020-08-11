@@ -11,13 +11,15 @@ fragment Bool: 'logic';
 fragment I32: 'i32';
 fragment Str: 'lang';
 fragment Letter: 'letter';
+fragment Ref: '~' TYPE;
+fragment ArrayType: '*' TYPE;
 
 // keywords
 MAGIC_KW: 'magic' | 'mag';
 AREA: 'area';
 HUMAN_BOOL: Ja | Nein;
 
-TYPE: Bool | I32 | Str | Letter;
+TYPE: Bool | I32 | Str | Letter | Ref | ArrayType;
 
 // literal values
 HUMAN_NUM: '-'? DIGIT+;
@@ -32,21 +34,24 @@ path: head=SYMBOL ('->' tail=SYMBOL)*;
 area_use: AREA area=path '.';
 
 literal: HUMAN_BOOL | HUMAN_NUM | HUMAN_LETTER | HUMAN_LANG;
-expr: literal | SYMBOL;
-
+ref_expr: '~' expr;
+deref_expr: '`' expr;
 type_decl: ':' type=TYPE;
 
+expr: literal | SYMBOL | ref_expr | deref_expr | magic_call;
 box_expr: 'box' SYMBOL (type=type_decl)? '<-' init=expr;
 
 stmte: (box_expr | expr);
 stmt: stmte '.';
 
+params: SYMBOL type_decl (';' SYMBOL type_decl)* ';'?;
+varargs: expr (',' expr)*;
+args: varargs? (';' varargs?)*;
 
-args: SYMBOL type_decl (',' SYMBOL type_decl)* ','?;
+magic: MAGIC_KW sym=SYMBOL '[' params? ']' ('{' body=stmt* '}' | '{' body=stmt* ret=expr '}' ':' ret_type=TYPE);
+magic_call: mag=SYMBOL '[' args ']';
 
-magic: MAGIC_KW sym=SYMBOL '[' args? ']' ('{' body=stmt* '}' | '{' body=stmt* ret=expr '}' ':' ret_type=TYPE);
-
-item: stmt | area_use | magic;
+item: area_use | magic;
 
 test: item* EOF;
 
