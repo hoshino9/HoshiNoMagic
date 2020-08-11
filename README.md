@@ -4,7 +4,10 @@
 实验性的编程语言。
 
 Backend: [LemonVM](https://github.com/LemonVM/LemonVM) ([ReDesign Version](https://github.com/LemonVM/LemonVMReDesign))
-Suffixes: `hm` or `hnm`;
+
+Suffixes: `hm` or `hnm`.
+
+> 警告：这个玩具语言不会解决任何现代编程语言的问题，甚至会带来不好的体验！
 
 ## Background ~ 背景 ~
 

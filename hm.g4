@@ -14,8 +14,10 @@ fragment Letter: 'letter';
 
 // keywords
 MAGIC_KW: 'magic' | 'mag';
-TYPE: Bool | I32 | Str | Letter;
+AREA: 'area';
 HUMAN_BOOL: Ja | Nein;
+
+TYPE: Bool | I32 | Str | Letter;
 
 // literal values
 HUMAN_NUM: '-'? DIGIT+;
@@ -25,16 +27,28 @@ HUMAN_LANG: '"' HUMAN_RAW_LETTER_ESC* '"';
 // symbol
 SYMBOL: MAG_SYM_CHAR (DIGIT | MAG_SYM_CHAR)* '?'?;
 
-
 // parsers
+path: head=SYMBOL ('->' tail=SYMBOL)*;
+area_use: AREA area=path '.';
+
 literal: HUMAN_BOOL | HUMAN_NUM | HUMAN_LETTER | HUMAN_LANG;
-right_value: literal | SYMBOL;
+expr: literal | SYMBOL;
 
-box_expr: 'box' ('<' TYPE '>')? SYMBOL '<-' right_value;
+type_decl: ':' type=TYPE;
 
-stmt: box_expr;
+box_expr: 'box' SYMBOL (type=type_decl)? '<-' init=expr;
 
-magic: MAGIC_KW sym=SYMBOL '[' ']';
+stmte: (box_expr | expr);
+stmt: stmte '.';
+
+
+args: SYMBOL type_decl (',' SYMBOL type_decl)* ','?;
+
+magic: MAGIC_KW sym=SYMBOL '[' args? ']' ('{' body=stmt* '}' | '{' body=stmt* ret=expr '}' ':' ret_type=TYPE);
+
+item: stmt | area_use | magic;
+
+test: item* EOF;
 
 // ignores
-WS: (' ' | '\\' [ntr]) -> skip;
+WS: [ \n\t\r] -> skip;
