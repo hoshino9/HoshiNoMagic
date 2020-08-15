@@ -1,6 +1,6 @@
-use hnm::regon::{HNMParser, Rule};
-use pest::{Parser, RuleType, Token};
-use pest::iterators::{Pairs, Tokens};
+use hnm::recog::{HNMParser, Rule};
+use pest::{Parser};
+use pest::iterators::Tokens;
 
 fn main() {
     let result = HNMParser::parse(Rule::magic, r#"mag qwq [ i: i32 ; j: lang ] {}: i32"#).unwrap();

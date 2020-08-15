@@ -1,9 +1,9 @@
-WHITESPACE = _{ " " | "\n" | "\t" | "\r" }
+WHITESPACE = _{ " " }
 
 MagicKW = { "magic" | "mag" }
 MagicChar = _{
     !(
-        ":" | ";" | "<-" | "->" | "-" | "+" | "*" | "/" | "%" | "[" | "]" | "{" | "}" | "." | "~" | "`"
+        ":" | ";" | "<-" | "->" | "-" | "+" | "*" | "/" | "%" | "[" | "]" | "{" | "}" | "." | "~" | "`" | ASCII_DIGIT | WHITE_SPACE
     ) ~ ANY
 }
 
@@ -12,21 +12,25 @@ I32 = { "i32" }
 Lang = { "lang" }
 Letter = { "letter" }
 
-Digit = _{ '0'..'9' }
-Num = { "-"? ~ !"0" ~ Digit ~ Digit* }
+Num = @{ "-"? ~ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* | ASCII_DIGIT)}
+ESCAPE = _{ "?" ~ ("?" | "n" | "r" | "t" | "'" | "\"") }
+HumanChar = _{ (!"?" ~ ANY) | ESCAPE }
+HumanLetter = { "'" ~ HumanChar ~ "'" }
+HumanLang = { "\"" ~ HumanChar* ~ "\"" }
 Ja = { "Ja" }
 Nein = { "Nein" }
 BLit = { Ja | Nein }
-Literal = { Num | BLit }
+Literal = { Num | BLit | HumanLetter | HumanLang }
 
 Ref = { "~" ~ Type }
-Arr = { BaseType ~ "*"+ }
-BaseType = _{ Ref | Letter | Logic | Lang | I32 }
-Type = { Arr | BaseType }
+Arr = ${ QuoteType ~ "*"+ }
+BaseType = _{ Letter | Logic | Lang | I32 | Ref }
+QuoteType = _{ "(" ~ BaseType ~ ")" | BaseType }
+Type = { Arr | QuoteType }
 
 Keywords = _{ Type | MagicKW }
 
-MagicSym = { !Keywords ~ (MagicChar)+ }
+MagicSym = @{ !Keywords ~ (MagicChar)+ }
 
 TypeDecl = _{ ":" ~ Type }
 
@@ -42,7 +46,7 @@ box_decl = { "box" ~ MagicSym ~ TypeDecl? ~ "<-" ~ expr }
 stmte = _{ box_decl | expr }
 stmt = { stmte ~ "." }
 
-param = { MagicSym ~ TypeDecl }
+param = _{ MagicSym ~ TypeDecl }
 params = { (param ~ (";" ~ param)*)?  }
 
 arg = _{ expr? ~ ("," ~ expr)*  }
