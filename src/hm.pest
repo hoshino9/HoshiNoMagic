@@ -3,26 +3,26 @@ WHITESPACE = _{ " " | "\n" | "\t" | "\r" }
 MagicKW = { "magic" | "mag" }
 MagicChar = _{
     !(
-        ":" | ";" | "<-" | "->" | "-" | "+" | "*" | "/" | "%" | "[" | "]" | "{" | "}" | "."
+        ":" | ";" | "<-" | "->" | "-" | "+" | "*" | "/" | "%" | "[" | "]" | "{" | "}" | "." | "~" | "`"
     ) ~ ANY
 }
 
-Logic = _{ "logic" }
-I32 = _{ "i32" }
-Lang = _{ "lang" }
-Letter = _{ "letter" }
+Logic = { "logic" }
+I32 = { "i32" }
+Lang = { "lang" }
+Letter = { "letter" }
 
 Digit = _{ '0'..'9' }
-Num = _{ "-"? ~ !"0" ~ Digit ~ Digit* }
-Ja = _{ "Ja" }
-Nein = _{ "Nein" }
-BLit = _{ Ja | Nein }
+Num = { "-"? ~ !"0" ~ Digit ~ Digit* }
+Ja = { "Ja" }
+Nein = { "Nein" }
+BLit = { Ja | Nein }
 Literal = { Num | BLit }
 
-Ref = _{ "~" ~ Type }
-Arr = _{ BaseType ~ "*"+ }
+Ref = { "~" ~ Type }
+Arr = { BaseType ~ "*"+ }
 BaseType = _{ Ref | Letter | Logic | Lang | I32 }
-Type = { BaseType | Arr }
+Type = { Arr | BaseType }
 
 Keywords = _{ Type | MagicKW }
 
@@ -38,11 +38,11 @@ BaseExpr = _{ Literal | MagicSym | RefExpr | DerefExpr | block }
 magic_inv = _{ BaseExpr ~ "[" ~ args ~ "]" }
 expr = { BaseExpr | magic_inv }
 
-box_decl = _{ "box" ~ MagicSym ~ TypeDecl? ~ "<-" ~ expr }
+box_decl = { "box" ~ MagicSym ~ TypeDecl? ~ "<-" ~ expr }
 stmte = _{ box_decl | expr }
 stmt = { stmte ~ "." }
 
-param = _{ MagicSym ~ TypeDecl }
+param = { MagicSym ~ TypeDecl }
 params = { (param ~ (";" ~ param)*)?  }
 
 arg = _{ expr? ~ ("," ~ expr)*  }
