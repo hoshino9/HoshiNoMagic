@@ -1,0 +1,53 @@
+WHITESPACE = _{ " " | "\n" | "\t" | "\r" }
+
+MagicKW = { "magic" | "mag" }
+MagicChar = _{
+    !(
+        ":" | ";" | "<-" | "->" | "-" | "+" | "*" | "/" | "%" | "[" | "]" | "{" | "}" | "."
+    ) ~ ANY
+}
+
+Logic = _{ "logic" }
+I32 = _{ "i32" }
+Lang = _{ "lang" }
+Letter = _{ "letter" }
+
+Digit = _{ '0'..'9' }
+Num = _{ "-"? ~ !"0" ~ Digit ~ Digit* }
+Ja = _{ "Ja" }
+Nein = _{ "Nein" }
+BLit = _{ Ja | Nein }
+Literal = { Num | BLit }
+
+Ref = _{ "~" ~ Type }
+Arr = _{ BaseType ~ "*"+ }
+BaseType = _{ Ref | Letter | Logic | Lang | I32 }
+Type = { BaseType | Arr }
+
+Keywords = _{ Type | MagicKW }
+
+MagicSym = { !Keywords ~ (MagicChar)+ }
+
+TypeDecl = _{ ":" ~ Type }
+
+Inv = _{ "[" ~ args ~ "]" }
+RefExpr = _{ "~" ~ BaseExpr }
+DerefExpr = _{ "`" ~ BaseExpr }
+block = { "{" ~ stmt* ~ "}" | "{" ~ stmt* ~ expr ~ "}" ~ ":" ~ Type }
+BaseExpr = _{ Literal | MagicSym | RefExpr | DerefExpr | block }
+magic_inv = _{ BaseExpr ~ "[" ~ args ~ "]" }
+expr = { BaseExpr | magic_inv }
+
+box_decl = _{ "box" ~ MagicSym ~ TypeDecl? ~ "<-" ~ expr }
+stmte = _{ box_decl | expr }
+stmt = { stmte ~ "." }
+
+param = _{ MagicSym ~ TypeDecl }
+params = { (param ~ (";" ~ param)*)?  }
+
+arg = _{ expr? ~ ("," ~ expr)*  }
+args = { arg? ~ (";" ~ arg)* }
+
+magic_decl = { MagicKW ~ MagicSym ~ "[" ~ params ~ "]"}
+
+magic = { magic_decl ~ block }

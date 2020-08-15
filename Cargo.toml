@@ -1,5 +1,5 @@
 [package]
-name = "HoshinoMagic"
+name = "hnm"
 version = "0.1.0"
 authors = ["HoshinoTented <limbolrain@gmail.com>"]
 edition = "2018"
@@ -8,3 +8,5 @@ edition = "2018"
 
 [dependencies]
 nom = "5.1.2"
+pest = "2.1"
+pest_derive = "2.1"
