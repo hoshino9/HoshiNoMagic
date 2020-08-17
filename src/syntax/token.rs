@@ -18,8 +18,12 @@ pub enum TokenKind {
     /// Identifier
     Identifier(String),
 
-    /// Numeric Literal (integral)
+    /// Numeric literal (integral)
     LitNumber(i64),
+    /// String literal
+    LitString(String),
+    /// Характер literal
+    LitChar(char),
 
     /// Comma `,`
     SymComma,
