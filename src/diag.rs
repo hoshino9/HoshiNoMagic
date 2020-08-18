@@ -21,12 +21,16 @@ impl Display for DiagLevel {
     }
 }
 
+pub struct FixHint {
+    hint_info: String,
+    hint_source_range: Option<SourceRange>
+}
+
 pub struct Diagnostic {
     pub level: DiagLevel,
     pub info: String,
     pub source_range: SourceRange,
-    pub fix_hint: Option<String>,
-    pub fix_hint_source_range: Option<SourceRange>
+    pub fix_hint: Option<FixHint>
 }
 
 impl Diagnostic {
@@ -37,22 +41,19 @@ impl Diagnostic {
             level,
             info,
             source_range,
-            fix_hint: None,
-            fix_hint_source_range: None
+            fix_hint: None
         }
     }
 
     pub fn with_fix_hint(level: DiagLevel,
                          info: String,
                          source_range: SourceRange,
-                         fix_hint: String,
-                         fix_hint_source_range: SourceRange) -> Self {
+                         fix_hint: FixHint) -> Self {
         Self {
             level,
             info,
             source_range,
-            fix_hint: Some(fix_hint),
-            fix_hint_source_range: Some(fix_hint_source_range)
+            fix_hint: Some(fix_hint)
         }
     }
 }
