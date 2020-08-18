@@ -1,12 +1,89 @@
+use crate::syntax::token::{TokenKind, SourceRange};
+
 pub enum Expr {
+    MagicSymRefExpr(MagicSymRefExpr),
+    BinaryExpr(BinaryExpr),
+    UnaryExpr(UnaryExpr),
+    InvokeLikeExpr(InvokeLikeExpr)
 }
 
 pub trait ExprVisitor {
     type ExprResult;
 
-    fn visit_stmt(&mut self, stmt: &Expr) -> Self::ExprResult {
-        match stmt {
-            _ => unimplemented!()
+    fn visit_expr(&mut self, expr: &Expr) -> Self::ExprResult {
+        match expr {
+            Expr::MagicSymRefExpr(magic_sym_ref_expr) =>
+                self.visit_magic_sym_ref_expr(magic_sym_ref_expr),
+            Expr::BinaryExpr(binary_expr) => self.visit_binary_expr(binary_expr),
+            Expr::UnaryExpr(unary_expr) => self.visit_unary_expr(unary_expr),
+            Expr::InvokeLikeExpr(invoke_like_expr) =>
+                self.visit_invoke_like_expr(invoke_like_expr)
         }
+    }
+
+    fn visit_magic_sym_ref_expr(&mut self,
+                                magic_sym_ref_expr: &MagicSymRefExpr) -> Self::ExprResult;
+    fn visit_binary_expr(&mut self, binary_expr: &BinaryExpr) -> Self::ExprResult;
+    fn visit_unary_expr(&mut self, unary_expr: &UnaryExpr) -> Self::ExprResult;
+    fn visit_invoke_like_expr(&mut self, invoke_like_expr: &InvokeLikeExpr) -> Self::ExprResult;
+}
+
+pub struct MagicSymRefExpr {
+    magic_sym: String,
+    magic_sym_range: SourceRange
+}
+
+impl MagicSymRefExpr {
+    pub fn new(magic_sym: String, magic_sym_range: SourceRange) -> Self {
+        Self {
+            magic_sym,
+            magic_sym_range
+        }
+    }
+}
+
+pub struct BinaryExpr {
+    operator: TokenKind,
+    lhs: Box<Expr>,
+    rhs: Box<Expr>,
+    operator_position: SourceRange
+}
+
+impl BinaryExpr {
+    pub fn new(operator: TokenKind,
+               lhs: Box<Expr>,
+               rhs: Box<Expr>,
+               operator_position: SourceRange) -> Self {
+        Self { operator, lhs, rhs, operator_position }
+    }
+}
+
+pub struct UnaryExpr {
+    operator: TokenKind,
+    base: Box<Expr>,
+    operator_position: SourceRange
+}
+
+impl UnaryExpr {
+    pub fn new(operator: TokenKind,
+               base: Box<Expr>,
+               operator_position: SourceRange) -> Self {
+        Self { operator, base, operator_position }
+    }
+}
+
+pub struct InvokeLikeExpr {
+    base: Box<Expr>,
+    params: Vec<Vec<Box<Expr>>>,
+    left_bracket_pos: SourceRange,
+    right_bracket_pos: SourceRange
+}
+
+impl InvokeLikeExpr {
+    pub fn new(base: Box<Expr>,
+               params: Vec<Vec<Box<Expr>>>,
+               left_bracket_pos: SourceRange,
+               right_bracket_pos: SourceRange) -> Self {
+        Self { base, params, left_bracket_pos, right_bracket_pos }
     }
 }
