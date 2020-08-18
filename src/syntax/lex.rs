@@ -120,19 +120,19 @@ impl<CharIter: FusedIterator<Item = char>> Lexer<CharIter> {
         self.next_char();
 
         let ch = match self.peek_char() {
-            Some('\\') => {
+            Some('?') => {
                 self.next_char();
                 match self.peek_char() {
                     Some('n') => '\n',
                     Some('t') => '\t',
                     Some('r') => '\r',
                     Some('\'') => '\'',
-                    Some('\\') => '\\',
+                    Some('?') => '?',
                     Some('0') => '\0',
                     Some(sth_else) => {
                         self.diags.push(Diagnostic::new(
                             DiagLevel::Warn,
-                            format!("unknown escape character: \\{}", sth_else),
+                            format!("unknown escape character: ?{}", sth_else),
                             self.cur_char_pos()));
                         sth_else
                     },
@@ -141,7 +141,7 @@ impl<CharIter: FusedIterator<Item = char>> Lexer<CharIter> {
                             DiagLevel::Error,
                             "unfinished escape character".into(),
                             self.cur_char_pos()));
-                        '\\'
+                        '?'
                     }
                 }
             },
@@ -185,19 +185,19 @@ impl<CharIter: FusedIterator<Item = char>> Lexer<CharIter> {
                 break;
             }
 
-            let this_char = if ch == '\\' {
+            let this_char = if ch == '?' {
                 self.next_char();
                 match self.peek_char() {
                     Some('n') => '\n',
                     Some('t') => '\t',
                     Some('r') => '\r',
                     Some('0') => '\0',
-                    Some('\\') => '\\',
+                    Some('?') => '?',
                     Some('"') => '\"',
                     Some(sth_else) => {
                         self.diags.push(Diagnostic::new(
                             DiagLevel::Warn,
-                            format!("unknown escape character: \\{}", sth_else),
+                            format!("unknown escape character: ?{}", sth_else),
                             self.cur_char_pos()));
                         sth_else
                     },
@@ -206,7 +206,7 @@ impl<CharIter: FusedIterator<Item = char>> Lexer<CharIter> {
                             DiagLevel::Error,
                             "unfinished escape character".into(),
                             self.cur_char_pos()));
-                        '\\'
+                        '?'
                     }
                 }
             } else {
@@ -308,16 +308,16 @@ mod test {
 
     #[test]
     fn test_lex_char() {
-        let source = "'a' 'b' 'c' '\\t' '\\n' '\\r' '\\0' '\\\\'";
+        let source = "'a' 'b' 'c' '?t' '?n' '?r' '?0' '??' '?''";
         let mut lexer = Lexer::new(source.chars());
-        for _ in 0..8 {
+        for _ in 0..9 {
             lexer.lex_char();
             lexer.skip_whitespace();
         }
-        assert_eq!(lexer.token_stream.len(), 8);
+        assert_eq!(lexer.token_stream.len(), 9);
 
-        let chars = "abc\t\n\r\0\\".chars().collect::<Vec<_>>();
-        for n in 0..8 {
+        let chars = "abc\t\n\r\0?\'".chars().collect::<Vec<_>>();
+        for n in 0..9 {
             if let TokenKind::LitChar(ch) = lexer.token_stream[n].token_kind {
                 assert_eq!(ch, chars[n]);
             } else {
@@ -328,7 +328,7 @@ mod test {
 
     #[test]
     fn test_lex_string() {
-        let source = r#""alpha" "beta" "gamma\theta" "\n\0\r" ",\",""#;
+        let source = r#""alpha" "beta" "gamma?theta" "?n?0?r" ",?",""#;
         let mut lexer = Lexer::new(source.chars());
         for _ in 0..5 {
             lexer.lex_string();
