@@ -45,6 +45,26 @@ pub enum TokenKind {
     SymSlash,
     /// Percentage `%`
     SymPercent,
+    /// Less than `<`
+    SymLt,
+    /// Greater than '>'
+    SymGt,
+    /// Equal to `=`
+    SymEq,
+    /// Less than or equal to `<=`
+    SymLeq,
+    /// Greater than or equal to `>=`
+    SymGeq,
+    /// Not equal to `!=`
+    SymNeq,
+    /// Amp `&`
+    SymAmp,
+    /// Pipe `|`
+    SymPipe,
+    /// UpArrow `^`
+    SymUpArrow,
+    /// Exclaim `!`
+    SymExclaim,
     /// Left bracket `[`
     SymLeftBracket,
     /// Right bracket `]`
@@ -67,7 +87,7 @@ pub fn lookup_keyword(maybe_keyword: &str) -> Option<TokenKind> {
         "i32" | "и32" | "И32" => Some(TokenKind::KwdI32),
         "lang" | "приговор" => Some(TokenKind::KwdLang),
         "letter" | "характер" => Some(TokenKind::KwdLetter),
-        "Ja" | "Да" | "да" => Some(TokenKind::KwdJa),
+        "Ja" | "Да" | "да" | "хорошо" => Some(TokenKind::KwdJa),
         "Nein" | "Нет" | "нет" => Some(TokenKind::KwdNein),
         _ => None
     }

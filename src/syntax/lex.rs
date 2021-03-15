@@ -10,7 +10,7 @@ use crate::diag::{Diagnostic, DiagLevel};
 
 lazy_static! {
     static ref CYRILLIC_CHARS: BTreeSet<char> = {
-        "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+        "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
             .chars()
             .collect::<BTreeSet::<_>>()
     };
@@ -59,6 +59,7 @@ impl<CharIter: FusedIterator<Item = char>> Lexer<CharIter> {
 
     fn skip_whitespace(&mut self) {
         while let Some(ch) = self.peek_char() {
+            dbg!(ch);
             match ch {
                 ' ' | '\t' | '\r' | '\n' => {
                     self.next_char();
@@ -227,6 +228,82 @@ impl<CharIter: FusedIterator<Item = char>> Lexer<CharIter> {
                                           SourceRange::new(self.line, start_col, self.column)));
     }
 
+    fn lex_symbol(&mut self) {
+        let ch = self.next_char().unwrap();
+        dbg!(ch);
+        let line = self.line;
+        let start_col = self.column;
+        let token_kind = match ch {
+            '.' => TokenKind::SymDot,
+            ',' => TokenKind::SymComma,
+            ':' => TokenKind::SymColon,
+            ';' => TokenKind::SymSemiColon,
+            '+' => TokenKind::SymPlus,
+            '*' => TokenKind::SymAsterisk,
+            '/' => TokenKind::SymSlash,
+            '%' => TokenKind::SymPercent,
+            '[' => TokenKind::SymLeftBracket,
+            ']' => TokenKind::SymRightBracket,
+            '{' => TokenKind::SymLeftBrace,
+            '}' => TokenKind::SymRightBrace,
+            '~' => TokenKind::SymWavyLine,
+            '`' => TokenKind::SymBackTick,
+            '&' => TokenKind::SymAmp,
+            '|' => TokenKind::SymPipe,
+            '^' => TokenKind::SymUpArrow,
+            '=' => TokenKind::SymEq,
+
+            '-' => {
+                match self.peek_char() {
+                    Some('>') => {
+                        let _ = self.next_char();
+                        TokenKind::SymRightArrow
+                    },
+                    _ => TokenKind::SymMinus
+                }
+            },
+
+            '<' => {
+                match self.peek_char() {
+                    Some('-') => {
+                        let _ = self.next_char();
+                        TokenKind::SymLeftArrow
+                    },
+                    Some('=') => {
+                        let _ = self.next_char();
+                        TokenKind::SymLeq
+                    },
+                    _ => TokenKind::SymLt
+                }
+            },
+
+            '>' => {
+                match self.peek_char() {
+                    Some('=') => {
+                        let _ = self.next_char();
+                        TokenKind::SymGeq
+                    },
+                    _ => TokenKind::SymGt
+                }
+            },
+
+            '!' => {
+                match self.peek_char() {
+                    Some('=') => {
+                        let _ = self.next_char();
+                        TokenKind::SymNeq
+                    },
+                    _ => TokenKind::SymExclaim
+                }
+            },
+            _ => unreachable!()
+        };
+        let end_col = self.column;
+        self.token_stream.push(
+            Token::new(token_kind, SourceRange::new(line, start_col, end_col))
+        );
+    }
+
     pub fn lex(&mut self) -> (Vec<Token>, Vec<Diagnostic>) {
         let mut ret_tokens = vec![];
         let mut ret_diags = vec![];
@@ -343,6 +420,50 @@ mod test {
             } else {
                 panic!("unexpected token kind");
             }
+        }
+    }
+
+    #[test]
+    fn test_lex_sym() {
+        let source = r#", : ; <- -> - + * / % < > = <= >= != & | ^ ! [ ] { } . ~ `"#;
+        let mut lexer = Lexer::new(source.chars());
+        for _ in 0..27 {
+            lexer.lex_symbol();
+            lexer.skip_whitespace();
+        }
+        assert_eq!(lexer.token_stream.len(), 27);
+        let token_kinds = [
+            TokenKind::SymComma,
+            TokenKind::SymColon,
+            TokenKind::SymSemiColon,
+            TokenKind::SymLeftArrow,
+            TokenKind::SymRightArrow,
+            TokenKind::SymMinus,
+            TokenKind::SymPlus,
+            TokenKind::SymAsterisk,
+            TokenKind::SymSlash,
+            TokenKind::SymPercent,
+            TokenKind::SymLt,
+            TokenKind::SymGt,
+            TokenKind::SymEq,
+            TokenKind::SymLeq,
+            TokenKind::SymGeq,
+            TokenKind::SymNeq,
+            TokenKind::SymAmp,
+            TokenKind::SymPipe,
+            TokenKind::SymUpArrow,
+            TokenKind::SymExclaim,
+            TokenKind::SymLeftBracket,
+            TokenKind::SymRightBracket,
+            TokenKind::SymLeftBrace,
+            TokenKind::SymRightBrace,
+            TokenKind::SymDot,
+            TokenKind::SymWavyLine,
+            TokenKind::SymBackTick
+        ];
+
+        for n in 0..27 {
+            assert_eq!(lexer.token_stream[n].token_kind, token_kinds[n])
         }
     }
 }
