@@ -30,10 +30,12 @@ pub struct BoxDecl {
 }
 
 impl BoxDecl {
-    pub fn new(box_name: impl ToString,
-               box_type: Option<Box<Type>>,
-               box_kwd_range: SourceRange,
-               box_name_range: SourceRange) -> Self {
+    pub fn new(
+        box_name: impl ToString,
+        box_type: Option<Box<Type>>,
+        box_kwd_range: SourceRange,
+        box_name_range: SourceRange
+    ) -> Self {
         Self {
             box_name: box_name.to_string(),
             box_type,
@@ -44,12 +46,14 @@ impl BoxDecl {
         }
     }
 
-    pub fn with_init_expr(box_name: impl ToString,
-                          box_type: Option<Box<Type>>,
-                          box_kwd_range: SourceRange,
-                          box_name_range: SourceRange,
-                          eq_range: SourceRange,
-                          init_expr: Box<Expr>) -> Self {
+    pub fn with_init_expr(
+        box_name: impl ToString,
+        box_type: Option<Box<Type>>,
+        box_kwd_range: SourceRange,
+        box_name_range: SourceRange,
+        eq_range: SourceRange,
+        init_expr: Box<Expr>
+    ) -> Self {
         Self {
             box_name: box_name.to_string(),
             box_type,
@@ -72,12 +76,14 @@ pub struct MagicDecl {
 }
 
 impl MagicDecl {
-    pub fn decl(magic_name: impl ToString,
-                parameters: Vec<Vec<(String, Box<Type>)>>,
-                magic_kwd_range: SourceRange,
-                magic_name_range: SourceRange,
-                left_bracket_pos: SourceRange,
-                right_bracket_pos: SourceRange) -> Self {
+    pub fn decl(
+        magic_name: impl ToString,
+        parameters: Vec<Vec<(String, Box<Type>)>>,
+        magic_kwd_range: SourceRange,
+        magic_name_range: SourceRange,
+        left_bracket_pos: SourceRange,
+        right_bracket_pos: SourceRange
+    ) -> Self {
         Self {
             magic_name: magic_name.to_string(),
             parameters,
@@ -89,13 +95,15 @@ impl MagicDecl {
         }
     }
 
-    pub fn def(magic_name: impl ToString,
-               parameters: Vec<Vec<(String, Box<Type>)>>,
-               magic_kwd_range: SourceRange,
-               magic_name_range: SourceRange,
-               left_bracket_pos: SourceRange,
-               right_bracket_pos: SourceRange,
-               body: Box<Stmt>) -> Self {
+    pub fn def(
+        magic_name: impl ToString,
+        parameters: Vec<Vec<(String, Box<Type>)>>,
+        magic_kwd_range: SourceRange,
+        magic_name_range: SourceRange,
+        left_bracket_pos: SourceRange,
+        right_bracket_pos: SourceRange,
+        body: Box<Stmt>
+    ) -> Self {
         Self {
             magic_name: magic_name.to_string(),
             parameters,
